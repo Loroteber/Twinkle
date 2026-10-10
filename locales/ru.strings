@@ -322,6 +322,11 @@
 "post_is_deleted" = "Запись была удалена.";
 "comment_from_page_is_deleted" = "Комментарий был удалён.";
 
+"cfeed_flash_added" = "Источник успешно добавлен";
+"cfeed_flash_open" = "<a href='/feed/$1'>Перейти к подборке</a>";
+"create_cfeed" = "Создать подборку";
+"cfeed_created_at" = "создана";
+
 /* Friends */
 
 "friends" = "Друзья";

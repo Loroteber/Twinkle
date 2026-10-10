@@ -6405,3 +6405,9 @@ hr {
     display: inline-block;
     vertical-align: baseline;
 }
+
+.cfeed_create {
+    width: 20px;
+    height: 20px;
+    background: url(../img/supp_icons.png);
+}

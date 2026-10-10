@@ -103,40 +103,46 @@
                     <a onClick="showIncreaseRatingDialog({$thisUser->getCoins()}, {ltrim($thisUser->getUrl(), '/')}, {$csrfToken})" class="link">{_increase_rating}</a>
                 </div>
             {else}
-                {if $thisUser->getChandlerUser()->can("substitute")->model('openvk\Web\Models\Entities\User')->whichBelongsTo(0)}
-                    <a href="/setSID/{$user->getChandlerUser()->getId()}?hash={rawurlencode($csrfToken)}" class="profile_link" style="width: 194px;">
-                        {tr("login_as", $user->getFirstName())}
-                    </a>
-                {/if}
-
-                {if $thisUser->getChandlerUser()->can("access")->model("admin")->whichBelongsTo(NULL)}
-                    <a href="/admin/users/id{$user->getId()}" class="profile_link" style="width: 194px;">
-                        {_manage_user_action}
-                    </a>
-                    <a href="javascript:banUser()" class="profile_link" style="width: 194px;">
-                        {_ban_user_action}
-                    </a>
-                    <a href="javascript:warnUser()" class="profile_link" style="width: 194px;">
-                        {_warn_user_action}
-                    </a>
-                    <a href="/admin/user{$user->getId()}/bans" class="profile_link" rel="nofollow">
-                        {_blocks}
-                    </a>
-                    <a href="/admin/logs?uid={$user->getId()}" class="profile_link" style="width: 194px;" rel="nofollow">
-                        {_last_actions}
-                    </a>
-                {/if}
-
-                {if $thisUser->getChandlerUser()->can('write')->model('openvk\Web\Models\Entities\TicketReply')->whichBelongsTo(0)}
-                    <a href="javascript:toggleBanInSupport()" class="profile_link" style="width: 194px;">
-                        {if $user->isBannedInSupport()}
-                            {_unban_in_support_user_action}
-                        {else}
-                            {_ban_in_support_user_action}
+                {if $thisUser->getChandlerUser()->can("substitute")->model('openvk\Web\Models\Entities\User')->whichBelongsTo(0) || $thisUser->getChandlerUser()->can("access")->model("admin")->whichBelongsTo(NULL) || $thisUser->getChandlerUser()->can('write')->model('openvk\Web\Models\Entities\TicketReply')->whichBelongsTo(0)}
+                    <a class="profile_link menu_toggler" style="width: 194px;">Возможности администратора</a>
+                    <div id="wallAttachmentMenu" class="hidden" style="margin: 0;">
+                        <a class="header menu_toggler">Возможности администратора</a>
+                        {if $thisUser->getChandlerUser()->can("substitute")->model('openvk\Web\Models\Entities\User')->whichBelongsTo(0)}
+                            <a href="/setSID/{$user->getChandlerUser()->getId()}?hash={rawurlencode($csrfToken)}" style="width: 194px;">
+                                {tr("login_as", $user->getFirstName())}
+                            </a>
                         {/if}
-                    </a>
-                {/if}
 
+                        {if $thisUser->getChandlerUser()->can("access")->model("admin")->whichBelongsTo(NULL)}
+                            <a href="/admin/users/id{$user->getId()}" style="width: 194px;">
+                                {_manage_user_action}
+                            </a>
+                            <a href="javascript:banUser()" style="width: 194px;">
+                                {_ban_user_action}
+                            </a>
+                            <a href="javascript:warnUser()" style="width: 194px;">
+                                {_warn_user_action}
+                            </a>
+                            <a href="/admin/user{$user->getId()}/bans" rel="nofollow">
+                                {_blocks}
+                            </a>
+                            <a href="/admin/logs?uid={$user->getId()}" style="width: 194px;" rel="nofollow">
+                                {_last_actions}
+                            </a>
+                        {/if}
+
+                        {if $thisUser->getChandlerUser()->can('write')->model('openvk\Web\Models\Entities\TicketReply')->whichBelongsTo(0)}
+                            <a href="javascript:toggleBanInSupport()" style="width: 194px;">
+                                {if $user->isBannedInSupport()}
+                                    {_unban_in_support_user_action}
+                                {else}
+                                    {_ban_in_support_user_action}
+                                {/if}
+                            </a>
+                        {/if}
+                    </div>
+
+                {/if}
                 <a style="width: 194px;" n:if="\OPENVK_ROOT_CONF['openvk']['preferences']['commerce'] && $user->getGiftCount() == 0" href="/gifts?act=pick&user={$user->getId()}" class="profile_link">{_send_gift}</a>
                 <a style="width: 194px;" n:if="$user->getPrivacyPermission('messages.write', $thisUser)" onclick="showUserDialog(event, {$user->getRealId()})" href="/im?sel={$user->getId()}" class="profile_link">{_send_message}</a>
 
@@ -170,7 +176,12 @@
                         <input type="submit" class="profile_link" value="{_friends_delete}" style="width: 194px;" />
                     </form>
                 {/if}
-
+                <form action="/cfeed/addSource" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="cfeed_id"  value="7" />
+                    <input type="hidden" name="user_id"  value="{$user->getId()}" />
+                    <input type="hidden" name="hash" value="{$csrfToken}" />
+                    <input type="submit" class="profile_link" value="бляять" style="width: 194px;" />
+                </form>
                 <a n:if="!$blacklist_status" id="_bl_toggler" data-name="{$user->getMorphedName('genitive', false, false)}" data-val="1" data-id="{$user->getRealId()}" class="profile_link" style="display:block;width:96%;">{_bl_add}</a>
                 {* 4 admins *}
                 <a n:if="$blacklist_status" id="_bl_toggler" data-val="0" data-id="{$user->getRealId()}" class="profile_link" style="display:block;width:96%;">{_bl_remove}</a>

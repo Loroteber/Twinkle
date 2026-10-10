@@ -125,6 +125,12 @@ routes:
       handler: "Wall->hashtagFeed"
       placeholders:
           hashTag: ".++"
+    - url: "/cfeed{num}"
+      handler: "Wall->View"
+    - url: "/cfeed/create"
+      handler: "Wall->create"
+    - url: "/cfeed/addSource"
+      handler: "Wall->addSource"
     - url: "/wall{num}"
       handler: "Wall->wall"
     - url: "/wall{num}/rss"

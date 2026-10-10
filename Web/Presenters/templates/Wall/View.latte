@@ -1,0 +1,60 @@
+{extends "../@listView.latte"}
+{var $perPage = 6} 
+
+{block title}{$cfeed->getName()}{/block}
+
+{block header}
+    <a href="{$owner->getUrl()}">{$owner->getCanonicalName()}</a> » {$cfeed->getName()}
+{/block}
+
+{block size}
+    <div class="playlistBlock" style="margin-top: -10px; padding: 10px;">
+        <div class="playlistWrapper">
+            <div class="playlistInfo">
+                <h4>{$cfeed->getName()}</h4>
+                <div class="moreInfo">
+                    69 подписчиков • {_cfeed_created_at} {$cfeed->getCreationTime()}
+                    <div n:if="!empty($cfeed->getDescription())" style="margin-top: 11px;">
+                        <span>{$cfeed->getDescription()}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="playlistCover">
+            <div class="profile_links">
+                <a n:if="$cfeed->isEditor($thisUser)" href="#" class="profile_link">Редактировать подборку</a>
+                <a href="#" class="profile_link">Удалить подборку</a>
+            </div>
+        </div>
+    </div>
+{/block}
+
+{block before_content}
+    <div class="container_gray" style="padding: 10px 10px 0;">
+        <h4 style="border-bottom: none;">Источники ({$count})</h4>
+    </div>
+{/block}
+
+{block link|strip|stripHtml}
+    {$x->getUrl()}
+{/block}
+
+{block preview}
+    <img src="{$x->getAvatarUrl('miniscule')}" width="75" alt="sex" loading=lazy />
+{/block}
+
+{block name}
+    {$x->getCanonicalName()}
+    <img n:if="$x->isVerified()" 
+        class="name-checkmark" 
+        src="/assets/packages/static/openvk/img/checkmark.png" 
+    />
+{/block}
+
+{block description}
+{/block}
+
+{block actions}
+    <a href="{$x->getUrl()}" class="profile_link">{_to_page}</a>
+    <a n:if="$cfeed->isEditor($thisUser)" href="#" class="profile_link"></a>
+{/block}

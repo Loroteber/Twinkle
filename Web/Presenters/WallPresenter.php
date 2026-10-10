@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace openvk\Web\Presenters;
 
 use openvk\Web\Models\Exceptions\TooMuchOptionsException;
-use openvk\Web\Models\Entities\{Poll, Post, Photo, Video, Club, User};
+use openvk\Web\Models\Entities\{Poll, Post, Photo, Video, Club, User, CFeed};
 use openvk\Web\Models\Entities\Notifications\{MentionNotification, RepostNotification, WallPostNotification, PostAcceptedNotification, NewSuggestedPostsNotification};
-use openvk\Web\Models\Repositories\{Posts, Users, Clubs, Albums, Notes, Videos, Comments, Photos, Audios};
+use openvk\Web\Models\Repositories\{Posts, Users, Clubs, Albums, Notes, Videos, Comments, Photos, Audios, CFeeds};
 use Chandler\Database\DatabaseConnection;
 use Nette\InvalidStateException as ISE;
 use Bhaktaraz\RSSGenerator\Item;
@@ -17,10 +17,12 @@ use Bhaktaraz\RSSGenerator\Channel;
 final class WallPresenter extends OpenVKPresenter
 {
     private $posts;
+    private $cfeeds;
 
-    public function __construct(Posts $posts)
+    public function __construct(Posts $posts, CFeeds $cfeeds)
     {
-        $this->posts = $posts;
+        $this->posts  = $posts;
+        $this->cfeeds = $cfeeds;
 
         parent::__construct();
     }
@@ -337,6 +339,70 @@ final class WallPresenter extends OpenVKPresenter
             "tidy"    => false,
             "atTop"   => false,
         ];
+    }
+
+    public function renderView(int $cfeed_id): void
+    {
+        $cfeed = $this->cfeeds->getCFeedById($cfeed_id);
+
+        if (!$cfeed) {
+            $this->notFound();
+        }
+
+        $this->template->cfeed    = $cfeed;
+        $this->template->owner    = $cfeed->getOwner();
+        $this->template->iterator = iterator_to_array($cfeed->getSources());
+        $this->template->count    = count($this->template->iterator);
+    }
+
+    public function renderCreate(): void
+    {
+        $this->assertUserLoggedIn();
+        $this->willExecuteWriteAction();
+
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            if (!empty($this->postParam("name")) && mb_strlen(trim($this->postParam("name"))) > 0) {
+                $cfeed = new CFeed();
+                $cfeed->setName($this->postParam("name"));
+                $cfeed->setDescription(empty($this->postParam("description")) ? null : $this->postParam("description"));
+                $cfeed->setOwner($this->user->id);
+                $cfeed->setCreated(time());
+                
+                $cfeed->save();
+                $cfeed->addEditor($this->user->identity);
+
+                $this->redirect("/cfeed" . $cfeed->getId());
+            } else {
+                $this->flashFail("err", tr("error"), tr("error_no_cfeed_name"));
+            }
+        }
+    }
+
+    public function renderAddSource(): void
+    {
+        $this->assertUserLoggedIn();
+        $this->willExecuteWriteAction();
+        
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $cfeed = $this->cfeeds->getCFeedById((int) $this->postParam("cfeed_id"));
+            $source = get_entity_by_id((int) $this->postParam("user_id"));
+
+            $cfeed->addSource($source);
+            
+            $this->flash("succ", tr("cfeed_flash_added"), tr("cfeed_flash_open", $cfeed->getId()));
+            $this->redirect($source->getUrl());
+        }
+    }
+
+    public function renderSubscribe(): void 
+    {
+        $this->assertUserLoggedIn();
+        $this->willExecuteWriteAction();
+
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $cfeed = $this->cfeeds->getCFeedById((int) $this->postParam("cfeed_id"));
+            
+        }
     }
 
     public function renderMakePost(int $wall): void
